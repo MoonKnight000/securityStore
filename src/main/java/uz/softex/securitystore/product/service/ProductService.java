@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -162,6 +161,7 @@ public class ProductService {
         result.forEach(i -> dtoList.add(new ClothDto(i)));
         PageDto pageDto = new PageDto<>(size, page, dtoList);
         return new ApiResponseGeneric<>(" topildi ", true, pageDto);
+        // ozgartirdim
     }
 
     public ApiResponse addTogetherCloth(List<@Valid ClothDto> productDtoList) {
