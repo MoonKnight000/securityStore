@@ -102,6 +102,7 @@ public class ProductService {
                 dtos.add(new ProductDto(i))
         );
         PageDto pageDto = new PageDto<>(size, page, dtos);
+        // komet yozdim
         return new ApiResponseGeneric<>(pageDto);
     }
 
