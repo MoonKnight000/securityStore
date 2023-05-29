@@ -16,9 +16,16 @@ public interface DrinksRepository extends JpaRepository<Drinks, Integer> {
 
 
     Optional<Drinks> findByStore_IdAndIdAndDeletedIsFalse(Integer store_id, Integer id);
-    @Query()
+
+    @Query(nativeQuery = true, value = "select  * from products where search_word(name,:name) " +
+            "and count between :minCount and :maxCount and price between :minPrice and :maxPrice " +
+            "and brand ILIKE(concat('%',:brand,'%')) and type in(:drinksType) and store_id = :storeId")
     Page<Drinks>
     findByNameContainsAndCountBetweenAndStoreIdAndAndPriceBetweenAndBrandContainingAndTypeAndDeletedIsFalse
             (String name, Integer minCount, Integer maxCount,
-             Integer  storeId, Double minPrice, Double maxPrice, String brand, DrinksType type,Pageable pageable);
+             Integer storeId, Double minPrice, Double maxPrice,
+             String brand, List<String> drinksType, Pageable pageable);
+
+    @Query(nativeQuery = true, value = "select count(id) from products where  store_id = :storeId")
+    Integer countById(Integer storeId);
 }

@@ -14,22 +14,19 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public interface ClothRepository extends JpaRepository<Cloth, Integer> {
-    List<Cloth> findByStore_IdAndDeletedIsFalse(Integer store_id);
 
     Optional<Cloth> findByStore_IdAndIdAndDeletedIsFalse(Integer store_id, Integer id);
 
     Page<Cloth> findAllByStoreIdAndDeletedIsFalse(Integer storeId, Pageable pageable);
 
-    //    @Query(value = "select pr from Cloth pr where search_word(concat('%',pr.name,'%'),lower(concat('%',:name,'%'))) and pr.count >:minCount and " +
-//                   "pr.count < :maxCount and pr.price> :minPrice and pr.price < :maxPrice and lower(pr.color) like (lower(concat('%',:color,'%'))) " +
-//
-//                 "and pr.typeCloth in (:typeCloth) and pr.clothSize in (:clothSize) and  pr.store.id=:storeId")
     @Query(nativeQuery = true, value = "select * from products where search_word(name, :name) and count between :minCount and :maxCount" +
             " and price between :minPrice and :maxPrice and color in(:color) and type_cloth in(:typeCloth )" +
             "and cloth_size in (:clothSize) and  store_id =:storeId")
     Page<Cloth> findByNameContainsAndCountBetweenAndStoreIdAndAndPriceBetweenAndColorContainsAndClothSizeAndTypeClothAndDeletedIsFalse
-    (String name, Integer minCount, Integer maxCount, Integer storeId, Double minPrice, Double maxPrice,
-     List<String> color, List<String> clothSize, List<String> typeCloth, Pageable pageable);
-//t
+            (String name, Integer minCount, Integer maxCount, Integer storeId, Double minPrice, Double maxPrice,
+             List<String> color, List<String> clothSize, List<String> typeCloth, Pageable pageable);
+
+    @Query(nativeQuery = true, value = "select count(id) from products where  store_id = :storeId")
+    Integer countById(Integer storeId);
 }
 

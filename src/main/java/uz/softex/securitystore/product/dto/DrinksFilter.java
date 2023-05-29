@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import uz.softex.securitystore.product.entity.DrinksType;
 
 import javax.validation.constraints.Min;
+import java.util.List;
+
+import static uz.softex.securitystore.product.entity.DrinksType.*;
 
 @Data
 @AllArgsConstructor
@@ -24,6 +27,6 @@ public class DrinksFilter {
 
     private String brand = "";
 
-    private DrinksType type;
+    private List<DrinksType> type= List.of(SHARBAT, GAZLI, MINERAL, ENERGETIK, ALKAGOL);
 
 }

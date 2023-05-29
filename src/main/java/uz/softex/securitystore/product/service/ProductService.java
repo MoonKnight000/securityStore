@@ -80,6 +80,8 @@ public class ProductService {
 
 
     public ApiResponseGeneric filterMap(Integer page, Integer size, Map<String, String> orderBy, ProductFilter filter) {
+        Integer integer = repository.countById(authService.getCurrentWorker().getStore().getId());
+        page = integer < page * size ? integer / size-1 : page;
         Pageable pageable = PageRequest.of(page, size);
         if (orderBy != null) {
             List<String> row = List.of("name", "price", "count");
@@ -122,6 +124,8 @@ public class ProductService {
     }
 
     public ApiResponseGeneric getAllClothes(Integer page, Integer size) {
+        Integer integer = clothRepository.countById(authService.getCurrentWorker().getStore().getId());
+        page = integer < page * size ? (integer / size)-1 : page;
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Cloth> all = clothRepository.findAllByStoreIdAndDeletedIsFalse(authService.getCurrentWorker().getStore().getId(), pageable);
@@ -147,6 +151,9 @@ public class ProductService {
     }
 
     public ApiResponseGeneric filterClothes(@Valid ClothFilter filter, Integer page, Integer size) {
+        Integer integer = clothRepository.countById(authService.getCurrentWorker().getStore().getId());
+        page = integer < page * size ? (integer / size)-1 : page;
+
         List<ClothSize> clothSizes = filter.getClothSize();
 
         List<TypeCloth> typeCloths = filter.getTypeCloth();
@@ -172,7 +179,7 @@ public class ProductService {
         System.out.println(result);
         List<ClothDto> dtoList = new ArrayList<>();
         result.forEach(i -> dtoList.add(new ClothDto(i)));
-        return new ApiResponseGeneric<>( new PageDto<>(size, page, dtoList));
+        return new ApiResponseGeneric<>(new PageDto<>(size, page, dtoList));
 
     }
 
@@ -194,6 +201,8 @@ public class ProductService {
     }
 
     public ApiResponseGeneric getAllDrinks(Integer page, Integer size) {
+        Integer integer = drinksRepository.countById(authService.getCurrentWorker().getStore().getId());
+        page = integer < page * size ? (integer / size)-1 : page;
         Workers workers = authService.getCurrentWorker();
 
         Pageable pageable = PageRequest.of(page, size);
@@ -216,18 +225,22 @@ public class ProductService {
     }
 
     public ApiResponseGeneric DrinksFilter(@Valid DrinksFilter filter, Integer page, Integer size) {
+        Integer integer = drinksRepository.countById(authService.getCurrentWorker().getStore().getId());
+        page = integer < page * size ? (integer / size)-1 : page;
+        List<DrinksType> type = filter.getType();
+        List<String> typeString = new ArrayList<>();
+        type.forEach(i -> typeString.add(String.valueOf(i)));
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Drinks> all = drinksRepository.findByNameContainsAndCountBetweenAndStoreIdAndAndPriceBetweenAndBrandContainingAndTypeAndDeletedIsFalse
                 (filter.getName(), filter.getMinCount(), filter.getMaxCount(), authService.getCurrentWorker().getStore().getId(),
-                        filter.getMinPrice(), filter.getMaxPrice(), filter.getBrand(), filter.getType(), pageable);
+                        filter.getMinPrice(), filter.getMaxPrice(), filter.getBrand(), typeString, pageable);
 
         List<Drinks> result = all.getContent();
         if (result.isEmpty()) return new ApiResponseGeneric("topilmadi", false, null);
         List<DrinksDto> dtoList = new ArrayList<>();
         result.forEach(i -> dtoList.add(new DrinksDto(i)));
-        PageDto pageDto = new PageDto<>(size, page, dtoList);
-        return new ApiResponseGeneric(pageDto);
+        return new ApiResponseGeneric(new PageDto<>(size, page, dtoList));
     }
 
     public ApiResponse addTogetherDrinks(List<@Valid DrinksDto> productDtoList) {
