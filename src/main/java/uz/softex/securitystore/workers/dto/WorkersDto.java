@@ -25,7 +25,6 @@ public class WorkersDto {
 
     private Integer store;
 
-    @NotBlank
     private Integer position;
 
 

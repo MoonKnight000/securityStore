@@ -18,13 +18,13 @@ import uz.softex.securitystore.workers.repository.WorkersRepository;
 @Service
 public class AuthService {
     private final
-     WorkersRepository workersRepository;
+    WorkersRepository workersRepository;
     private final
-     PositionRepository positionRepository;
+    PositionRepository positionRepository;
     private final
-     StoreRepository storeRepository;
+    StoreRepository storeRepository;
     private final
-     PasswordEncoder encoder;
+    PasswordEncoder encoder;
 
     public AuthService(WorkersRepository workersRepository, PositionRepository positionRepository, StoreRepository storeRepository, PasswordEncoder encoder) {
         this.workersRepository = workersRepository;
@@ -36,9 +36,9 @@ public class AuthService {
     public ApiResponse register(WorkersDto workersDto) {
 
         Store store = storeRepository.findById(workersDto.getStore()).orElseThrow(StoreNotFound::new);
-        Position position = positionRepository.findById(workersDto.getId()).orElseThrow(PositionNotFound::new);
-        Workers workers = new Workers(workersDto, store , position);
-
+        Position position = positionRepository.findById(workersDto.getPosition()).orElseThrow(PositionNotFound::new);
+        Workers workers = new Workers(workersDto, store, position);
+        workers.setPassword(encoder.encode(workers.getPassword()));
         workersRepository.save(workers);
         return new ApiResponse();
     }

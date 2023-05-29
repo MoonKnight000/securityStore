@@ -39,4 +39,7 @@ insert into position_permission_list(position_id, permission_list) values (1, 'D
 insert into position_permission_list(position_id, permission_list) values (1, 'EDIT_PRODUCT');
 insert into position_permission_list(position_id, permission_list) values (1, 'VIEW_MY_PRODUCTS');
 insert into position_permission_list(position_id, permission_list) values (1, 'FILTER_PRODUCTS');
+
+
+INSERT INTO  workers (id,enabled, fullname, password, salary, username, position_id) values (1,true, 'Bo`riyev Shahboz', '$2a$12$E.uF5SubGbVa00g1P4oGfuv/AoJArTMrx.NC9VsUu2usVUK5I8OIK', 15,'devshaha',1);
 --

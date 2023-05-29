@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uz.softex.securitystore.product.entity.ClothSize;
 import uz.softex.securitystore.product.entity.ClothSize.*;
+import uz.softex.securitystore.product.entity.Color;
 import uz.softex.securitystore.product.entity.TypeCloth;
 
 import java.lang.reflect.Array;
@@ -25,7 +26,7 @@ public class ClothFilter {
     private Double MinPrice = 0.0;
     private Double MaxPrice = 1_000_000_000_000_000.0;
 
-    private String color = "";
+    private Color color ;
     private List<ClothSize> clothSize = List.of(X, XL, XLS, S, SL, SXL);
     private List<TypeCloth> typeCloth = List.of(FOR_MEN, FOR_WOMEN, FOR_BABY);
 }
