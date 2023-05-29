@@ -15,14 +15,17 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
 
     Optional<Products> findByStore_IdAndIdAndDeletedIsFalse(Integer store_id, Integer id);
 
-    boolean existsByStoreIdAndId(Integer store_id, Integer id);
-
     void deleteByStoreId(Integer store_id);
-
+@Query(nativeQuery = true,value ="select * from products where search_word(name,:name) and count between :minCount and :maxCount2 " +
+        "and price between :minPrice and :maxPrice and store_id = :storeId")
     Page<Products> findByNameContainsAndCountBetweenAndPriceBetweenAndStoreIdAndDeletedIsFalse
-            (String name, Integer minCount, Integer maxCount2, Double minPrice, Double maxPrice, Integer storeId,Pageable pageable);
+            (String name, Integer minCount, Integer maxCount2, Double minPrice, Double maxPrice,
+             Integer storeId, Pageable pageable);
 
     Page<Products> findByStoreIdAndDeletedIsFalse(Integer store_id, Pageable pageable);
 
     Optional<Products> findAllByStoreIdAndIdAndDeletedIsFalse(Integer store_id, Integer id);
+
+    @Query(nativeQuery = true, value = "select count(id) from products where store_id = :storeId")
+    Integer countById(Integer storeId);
 }

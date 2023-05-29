@@ -3,6 +3,7 @@ package uz.softex.securitystore.product.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import uz.softex.securitystore.product.entity.Drinks;
 import uz.softex.securitystore.product.entity.DrinksType;
 
@@ -15,6 +16,7 @@ public interface DrinksRepository extends JpaRepository<Drinks, Integer> {
 
 
     Optional<Drinks> findByStore_IdAndIdAndDeletedIsFalse(Integer store_id, Integer id);
+    @Query()
     Page<Drinks>
     findByNameContainsAndCountBetweenAndStoreIdAndAndPriceBetweenAndBrandContainingAndTypeAndDeletedIsFalse
             (String name, Integer minCount, Integer maxCount,
