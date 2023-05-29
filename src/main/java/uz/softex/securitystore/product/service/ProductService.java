@@ -117,8 +117,8 @@ public class ProductService {
     // CLOTHES
 
     public ApiResponse add(@Valid ClothDto dto) {
-            clothRepository.save(new Cloth(dto, authService.getCurrentWorker().getStore()));
-            return new ApiResponse();
+        clothRepository.save(new Cloth(dto, authService.getCurrentWorker().getStore()));
+        return new ApiResponse();
     }
 
     public ApiResponseGeneric getAllClothes(Integer page, Integer size) {
@@ -151,35 +151,46 @@ public class ProductService {
 
         List<TypeCloth> typeCloths = filter.getTypeCloth();
 
+        List<Color> colors = filter.getColor();
+
+        List<String> clothSizesString = new ArrayList<>();
+
+        clothSizes.forEach(i -> clothSizesString.add(String.valueOf(i)));
+        List<String> typeClothsString = new ArrayList<>();
+        typeCloths.forEach(i -> typeClothsString.add(String.valueOf(i)));
+
+        List<String> colorsString = new ArrayList<>();
+        colors.forEach(i -> colorsString.add(String.valueOf(i)));
+
         Pageable pageable = PageRequest.of(page, size);
         Page<Cloth> all = clothRepository
                 .findByNameContainsAndCountBetweenAndStoreIdAndAndPriceBetweenAndColorContainsAndClothSizeAndTypeClothAndDeletedIsFalse(
                         filter.getName(), filter.getMinCount(), filter.getMaxCount(), authService.getCurrentWorker().getStore().getId(), filter.getMinPrice(),
-                        filter.getMaxPrice(), filter.getColor(), clothSizes, typeCloths
+                        filter.getMaxPrice(), colorsString, clothSizesString, typeClothsString
                         , pageable);
         List<Cloth> result = all.getContent();
+        System.out.println(result);
         List<ClothDto> dtoList = new ArrayList<>();
         result.forEach(i -> dtoList.add(new ClothDto(i)));
-        PageDto pageDto = new PageDto<>(size, page, dtoList);
-        return new ApiResponseGeneric<>(" topildi ", true, pageDto);
-        // ozgartirdim
+        return new ApiResponseGeneric<>( new PageDto<>(size, page, dtoList));
+
     }
 
     public ApiResponse addTogetherCloth(List<@Valid ClothDto> productDtoList) {
-            List<Cloth> productsList = new ArrayList<>();
-            productDtoList.forEach(i -> {
-                        productsList.add(new Cloth(i, authService.getCurrentWorker().getStore()));
-                    }
-            );
-            clothRepository.saveAll(productsList);
-            return new ApiResponse();
+        List<Cloth> productsList = new ArrayList<>();
+        productDtoList.forEach(i -> {
+                    productsList.add(new Cloth(i, authService.getCurrentWorker().getStore()));
+                }
+        );
+        clothRepository.saveAll(productsList);
+        return new ApiResponse();
     }
 
     // DRINKS
 
     public ApiResponse add(@Valid DrinksDto dto) {
-            drinksRepository.save(new Drinks(dto, authService.getCurrentWorker().getStore()));
-            return new ApiResponse("saqlandi", true);
+        drinksRepository.save(new Drinks(dto, authService.getCurrentWorker().getStore()));
+        return new ApiResponse("saqlandi", true);
     }
 
     public ApiResponseGeneric getAllDrinks(Integer page, Integer size) {
@@ -198,10 +209,10 @@ public class ProductService {
     }
 
     public ApiResponse updateDrinks(@Valid DrinksDto dto) {
-            Drinks drinks = drinksRepository.findByStore_IdAndIdAndDeletedIsFalse(authService.getCurrentWorker().getStore().getId(), dto.getId()).orElseThrow(ProductNotFoundException::new);
-            drinks = new Drinks(dto, drinks.getStore());
-            drinksRepository.save(drinks);
-            return new ApiResponse();
+        Drinks drinks = drinksRepository.findByStore_IdAndIdAndDeletedIsFalse(authService.getCurrentWorker().getStore().getId(), dto.getId()).orElseThrow(ProductNotFoundException::new);
+        drinks = new Drinks(dto, drinks.getStore());
+        drinksRepository.save(drinks);
+        return new ApiResponse();
     }
 
     public ApiResponseGeneric DrinksFilter(@Valid DrinksFilter filter, Integer page, Integer size) {
@@ -220,11 +231,11 @@ public class ProductService {
     }
 
     public ApiResponse addTogetherDrinks(List<@Valid DrinksDto> productDtoList) {
-            List<Drinks> productsList = new ArrayList<>();
-            productDtoList.forEach(i -> {
-                productsList.add(new Drinks(i,authService.getCurrentWorker().getStore()));
-            });
-            drinksRepository.saveAll(productsList);
-            return new ApiResponse();
+        List<Drinks> productsList = new ArrayList<>();
+        productDtoList.forEach(i -> {
+            productsList.add(new Drinks(i, authService.getCurrentWorker().getStore()));
+        });
+        drinksRepository.saveAll(productsList);
+        return new ApiResponse();
     }
 }
