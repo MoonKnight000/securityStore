@@ -26,7 +26,6 @@ public interface ClothRepository extends JpaRepository<Cloth, Integer> {
             (String name, Integer minCount, Integer maxCount, Integer storeId, Double minPrice, Double maxPrice,
              List<String> color, List<String> clothSize, List<String> typeCloth, Pageable pageable);
 
-    @Query(nativeQuery = true, value = "select count(id) from products where  store_id = :storeId")
-    Integer countById(Integer storeId);
+
 }
 

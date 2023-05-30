@@ -26,6 +26,5 @@ public interface DrinksRepository extends JpaRepository<Drinks, Integer> {
              Integer storeId, Double minPrice, Double maxPrice,
              String brand, List<String> drinksType, Pageable pageable);
 
-    @Query(nativeQuery = true, value = "select count(id) from products where  store_id = :storeId")
-    Integer countById(Integer storeId);
+
 }

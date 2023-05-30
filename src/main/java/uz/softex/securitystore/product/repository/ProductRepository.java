@@ -26,6 +26,5 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
 
     Optional<Products> findAllByStoreIdAndIdAndDeletedIsFalse(Integer store_id, Integer id);
 
-    @Query(nativeQuery = true, value = "select count(id) from products where store_id = :storeId")
-    Integer countById(Integer storeId);
+
 }
