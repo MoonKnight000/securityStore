@@ -132,7 +132,6 @@ public class ProductController {
     @PreAuthorize(value = "hasAuthority('ADD_PRODUCT')")
     @PostMapping("/addSeveralDrinks")
     public HttpEntity<?> addTogetherDrinks(@Valid @RequestBody List<DrinksDto> dto) {
-        ApiResponse add = service.addTogetherDrinks(dto);
         return ResponseEntity.ok(service.addTogetherDrinks(dto));
     }
 }

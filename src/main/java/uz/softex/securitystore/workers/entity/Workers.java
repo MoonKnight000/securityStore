@@ -50,7 +50,7 @@ public class Workers implements UserDetails {
         this.salary = dto.getSalary();
         this.store = store;
         this.position = position;
-        this.enabled = true;
+        this.enabled = false;
 
     }
 

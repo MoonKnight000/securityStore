@@ -1,11 +1,17 @@
 package uz.softex.securitystore.inputs;
 
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import uz.softex.securitystore.inputs.dto.*;
 import uz.softex.securitystore.inputs.entity.Inputs;
 import uz.softex.securitystore.inputs.exceptions.InputsNotFound;
@@ -25,6 +31,8 @@ import uz.softex.securitystore.store.repository.StoreRepository;
 import uz.softex.securitystore.workers.entity.Workers;
 import uz.softex.securitystore.workers.service.AuthService;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -32,17 +40,17 @@ import java.util.*;
 @Service
 public class InputsService {
     private final
-     InputsRepository repository;
+    InputsRepository repository;
     private final
-     ProductRepository productRepository;
+    ProductRepository productRepository;
     private final
-     PaymentTypeRepository paymentTypeRepository;
+    PaymentTypeRepository paymentTypeRepository;
     private final
-     StoreRepository storeRepository;
+    StoreRepository storeRepository;
     private final
-     SaledProductsCountRepository saledProductsCountRepository;
+    SaledProductsCountRepository saledProductsCountRepository;
     private final
-     AuthService authService;
+    AuthService authService;
 
     public InputsService(InputsRepository repository, ProductRepository productRepository, PaymentTypeRepository paymentTypeRepository, StoreRepository storeRepository, SaledProductsCountRepository saledProductsCountRepository, AuthService authService) {
         this.repository = repository;
@@ -88,7 +96,7 @@ public class InputsService {
         for (SaledProductsCountDto countDto : countDtos) {
             Products products = productRepository.findByStore_IdAndIdAndDeletedIsFalse(store.getId(), countDto.getProducts()).orElseThrow(ProductNotFoundException::new);
 
-            if (products.getCount() - countDto.getCount() < 0) throw  new ProductNotFoundException();
+            if (products.getCount() - countDto.getCount() < 0) throw new ProductNotFoundException();
         }
 
         for (SaledProductsCountDto countDto : countDtos) {
@@ -100,9 +108,9 @@ public class InputsService {
         }
 
         productRepository.saveAll(productsList);
-        saledProductsCountRepository.saveAll(saledProductsCountsList);
+//        saledProductsCountRepository.saveAll(saledProductsCountsList);
 
-        repository.save(new Inputs(dto,paymentTypeRepository.findById(dto.getPaymentType()).orElseThrow(PaymentTypeNotFound::new),store,productsList,countDtos));
+        repository.save(new Inputs(dto, paymentTypeRepository.findById(dto.getPaymentType()).orElseThrow(PaymentTypeNotFound::new), store, productsList, countDtos));
 
         store.setBalance(store.getBalance() + amount);
         storeRepository.save(store);
@@ -144,11 +152,11 @@ public class InputsService {
             dto.setAmount(products.getPrice() * countDto.getCount());
         }
         productRepository.saveAll(productsList);
-        saledProductsCountRepository.saveAll(saledProductsCountsList);
+//        saledProductsCountRepository.saveAll(saledProductsCountsList);
 
 
         store.setBalance(store.getBalance() - updated.getAmount() + dto.getAmount());
-        updated = new Inputs(dto,paymentTypeRepository.findById(dto.getPaymentType()).orElseThrow(PaymentTypeNotFound::new),store,productsList,countDtos);
+        updated = new Inputs(dto, paymentTypeRepository.findById(dto.getPaymentType()).orElseThrow(PaymentTypeNotFound::new), store, productsList, countDtos);
 
         repository.save(updated);
 
@@ -161,7 +169,7 @@ public class InputsService {
         Workers workers = (Workers) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Store store = workers.getStore();
 
-        Inputs inputs = repository.findByIdAndStoreId(id,store.getId()).orElseThrow(InputsNotFound::new);
+        Inputs inputs = repository.findByIdAndStoreId(id, store.getId()).orElseThrow(InputsNotFound::new);
         List<SaledProductsCount> saledProductsCounts = inputs.getSaledProductsCounts();
         for (SaledProductsCount saledProductsCount : saledProductsCounts) {
             Products products = saledProductsCount.getProducts();
@@ -273,5 +281,53 @@ public class InputsService {
             }
         }
         return new ApiResponseGeneric<>("olindi ", true, result);
+    }
+
+    public ApiResponseGeneric uploadExcel(HttpServletResponse response) throws Exception {
+        Workers currentWorker = authService.getCurrentWorker();
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        File file = new File("F:\\/excel.xlsx");
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        XSSFSheet sheet = workbook.createSheet("First");
+        XSSFRow row = sheet.createRow(0);
+        row.createCell(0).setCellValue("id");
+        row.createCell(1).setCellValue("amount");
+        row.createCell(2).setCellValue("paymentType");
+        row.createCell(3).setCellValue("ProductName");
+        row.createCell(4).setCellValue("Saled count");
+        List<Inputs> byStoreId = repository.findByStore_Id(currentWorker.getStore().getId());
+        Integer rowNumber = 1;
+        for (int i = 0; i < byStoreId.size(); i++) {
+            Inputs inputs = byStoreId.get(i);
+            row = sheet.createRow(i + rowNumber);
+            row.createCell(0).setCellValue(inputs.getId());
+            row.createCell(1).setCellValue(inputs.getAmount());
+            row.createCell(2).setCellValue(inputs.getPaymentType().getPaymentType());
+            List<SaledProductsCount> saledProductsCounts = inputs.getSaledProductsCounts();
+            for (int j = 0; j < saledProductsCounts.size(); j++) {
+                SaledProductsCount saledProductsCount = saledProductsCounts.get(j);
+                row.createCell(3).setCellValue(saledProductsCount.getProducts().getName());
+                row.createCell(4).setCellValue(saledProductsCount.getCount());
+                if (j + 1 < saledProductsCounts.size()) {
+                    rowNumber++;
+                    row = sheet.createRow(i + rowNumber);
+                }
+            }
+            for (int j = 0; j < 5; j++) {
+                sheet.autoSizeColumn(j);
+            }
+        }
+        workbook.write(fileOutputStream);
+        workbook.close();
+        response.setHeader("Content-Disposition", "attachment; filename=\"excel.xlsx\"");
+        response.setContentType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            FileCopyUtils.copy(inputStream, response.getOutputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new ApiResponseGeneric<>();
     }
 }

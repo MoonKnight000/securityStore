@@ -33,10 +33,11 @@ public class Inputs extends AbstractEntity {
 
     public Inputs(InputsDto dto, PaymentType paymentType, Store store, List<Products> productsList, List<SaledProductsCountDto> saledProductsCountDtoList) {
         this.saledProductsCounts = new ArrayList<>();
-        this.amount = dto.getAmount();
+        this.amount = 0.0;
         this.paymentType = paymentType;
         this.store = store;
         for (int i = 0; i < saledProductsCountDtoList.size(); i++) {
+           this.amount += saledProductsCountDtoList.get(i).getCount() * productsList.get(i).getPrice();
             saledProductsCounts.add(new SaledProductsCount(saledProductsCountDtoList.get(i), productsList.get(i)));
         }
     }

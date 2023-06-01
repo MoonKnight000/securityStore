@@ -259,6 +259,7 @@ public class ProductService {
     public ApiResponse addTogetherDrinks(List<@Valid DrinksDto> productDtoList) {
         List<Drinks> productsList = new ArrayList<>();
         productDtoList.forEach(i ->productsList.add(new Drinks(i, authService.getCurrentWorker().getStore())));
+        System.out.println(productDtoList);
         drinksRepository.saveAll(productsList);
         return new ApiResponse();
     }

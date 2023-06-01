@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import uz.softex.securitystore.inputs.dto.InputsDto;
 import uz.softex.securitystore.inputs.dto.StatisticsType;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.sql.Timestamp;
 
@@ -77,5 +78,9 @@ public class InputsController {
         return ResponseEntity.ok(service.saleTop(topNumber));
     }
 
-
+    @PreAuthorize(value = "hasAuthority('VIEW_INPUTS')")
+    @GetMapping("/getFile")
+    public HttpEntity<?> saleTop(HttpServletResponse response) throws Exception {
+        return ResponseEntity.ok(service.uploadExcel(response));
+    }
 }
